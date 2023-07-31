@@ -23,6 +23,8 @@ router.get('/edit-product/:productId' ,adminController.getEditProduct);
 
 router.post('/edit-product', adminController.postEditProduct);
 
+router.post('/delete-product', adminController.postDeleteProduct);
+
 /*
  --- don't erase ---
 exports.routes = router;        -> as we are doing it in the shop.js file.

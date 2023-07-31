@@ -27,10 +27,13 @@
                                     </p>
                                 </div>
                                 <p>(views/admin/products.ejs)</p>
+                                <!-- p><%= product.id %></p -->
                                 <div class="card__actions">
                                     <a href="/admin/edit-product/<%= product.id %>?edit=true" class="btn">Edit</a>       <!-- admin route -->
                                     <form action="/admin/delete-product" method="POST">
+                                        <input type="hidden" value="<%= product.id %>" name="productId">
                                         <button class="btn" type="submit">Delete</button>
+
                                     </form>
 
                                 </div>

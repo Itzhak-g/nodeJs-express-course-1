@@ -44,7 +44,7 @@ exports.getEditProduct = (req, res, next) => {       // getEditProduct => action
         if (!product) {
             return res.redirect('/');
         }
-        res.render('admin/edit-product', {
+        res.render('admin/edit-product', {     // *** creating the ejs page with populated editable fields ***
             pageTitle: 'Edit Product',
             path: '/admin/edit-product',     // can stay as is, needed only for highlighting certain items in navigation bar
             editing: editMode,
@@ -69,9 +69,16 @@ exports.postEditProduct = (req, res, next) => {
         updatedDesc,
         updatedPrice
     );
-    updatedProduct.save();
+    updatedProduct.save();       // good to add a callback to make sure we are re-directing only in the case of no errors.
     res.redirect('/admin/products');
 };
+
+exports.postDeleteProduct = (req, res, next) => {
+    const prodId = req.body.productId;
+    console.log('product id is: ', prodId);
+    Product.deleteById(prodId);       // good to add a callback to make sure we are re-directing only in the case of no errors.
+    res.redirect('/admin/products');
+}
 
 exports.getProducts = (req, res, next) => {
     Product.fetchAll((products) => {

@@ -1,6 +1,7 @@
 // const products = [];       We want to save our products to a file, not to array.
 const fs = require('fs');
 const path = require('path');
+const Cart = require('./cart');
 
 const p = path.join(
     path.dirname(process.mainModule.filename),
@@ -29,15 +30,15 @@ module.exports = class Product {
     }
     save() {
         getProductsFromFile(products => {      //parameter compatible with cb <<<<<<<
-            if (this.id) {
+            if (this.id) {      // adding additional existing product, increasing its quantity by one..
                 const existingProductIndex = products.findIndex(prod => prod.id === this.id);
                 const updatedProducts = [...products];
                 updatedProducts[existingProductIndex] = this;
                 fs.writeFile(p, JSON.stringify(updatedProducts) , err => {
                     console.log(err);
                 });
-            } else {
-                this.id = Math.random().toString();
+            } else {        // adding a new product - not yet shown in the cart..
+                this.id = Math.random().toString();     // creating new id for the new product
                 products.push(this);
                 fs.writeFile(p, JSON.stringify(products), (err) => {
                     console.log(err);
@@ -57,6 +58,22 @@ module.exports = class Product {
             });*!/
         });*/
     }
+
+    static deleteById(id) {
+        getProductsFromFile(products => {       //   cb(JSON.parse(fileContent)); equals to = products..
+            const productIndex = products.findIndex(p => p.id === id);   // synchronous function code. (read below)
+            //we don't need above line, using instead the following in order to retrieve product.price :
+            const product = products.find(prd => prd.id === id);
+            const updatedProducts = products.filter(p => p.id !== id);
+            fs.writeFile(p, JSON.stringify(updatedProducts), err => {     //callback function starts at 'err'.
+                if (!err) {
+                    // removing the product from the cart will start here:
+                    Cart.deleteProduct(id, product.price);
+                }
+            });
+        });
+    }
+
     static fetchAll(cb) {        // 'static' - enable to run the function on the class itself, not on instantiate object
         //return this.products;    no products property in the class. only the external products array. that's why use instead - :
         // return products;     (before using file to save the products..)
