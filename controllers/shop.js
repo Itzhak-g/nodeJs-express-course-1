@@ -37,11 +37,29 @@ exports.getIndex = (req, res, next) => {
     });
 }
 
+// >->->->->->-> loading the Cart
 exports.getCart = (req, res, next) => {
-    res.render('shop/cart', {   // cart.ejs file under views/shop/
-        path: '/cart',     // url
-        pageTitle: 'Your Cart'
-    } );
+    Cart.getCart(cart => {
+        // we just entered the first c-b function, to get the 'cart' parameter value ---
+        Product.fetchAll(products => {
+            // This is (we are inside -- ) the (second) call-back function..
+            // const cartProducts = [];
+            let cartProducts;   // inside this cart array we will put the products information to be shown on the *cart* html (ejs..)
+            cartProducts = [];      // o.k. not so sure about the inner structure -> (( let cart = {products: [], totalPrice: 0}; )) -> from 'cart.js'
+            for (product of products) {   // running on *products* array. NOT cart products!!!
+                const cartProductData = cart.products.find(prod => prod.id === product.id);
+                if(cartProductData) {
+                    cartProducts.push({productData: product, qty: cartProductData.qty});
+                }
+            }
+            res.render('shop/cart', {   // cart.ejs file under views/shop/
+                path: '/cart',     // url
+                pageTitle: 'Your Cart',
+                products: cartProducts
+            });
+        });
+
+    });
 }
 // *-*-*-*-*-*--*-*-*-*-*-*-*-
 exports.postCart = (req, res, next) => {

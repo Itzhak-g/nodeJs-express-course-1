@@ -22,7 +22,7 @@ module.exports = class Cart {
     static addProduct(id, productPrice) {
         // Fetch the previous cart
         fs.readFile(p, (err, fileContent) => {
-            let cart = {products: [], totalPrice: 0};   // **** Here 'cart' is empty var, but gets its definition, before 'readFile(..)'.
+            let cart = {products: [], totalPrice: 0};   // **** Here 'cart' is empty var, but gets its definition, before 'readFile(..)' ******
             if (!err) {     // 'products' array structure not yet defined-
                 cart = JSON.parse(fileContent);     // JSON Helper; 'cart' variable gets populated by/according to the cart data file (structure).
             }
@@ -33,13 +33,13 @@ module.exports = class Cart {
             let updatedProduct;
         // **** Add new product / increase quantity
             if (existingProduct) {
-                updatedProduct = {...existingProduct};      // spread operation; {object}
+                updatedProduct = {...existingProduct};      // spread operation; running on the object: {object}
                 updatedProduct.qty = updatedProduct.qty + 1;
                 cart.products = [...cart.products];
                 cart.products[existingProductIndex] = updatedProduct;
             } else {     // getting/adding a new product -
-                updatedProduct = { id: id, qty: 1 };        //   { product object gets its definition }
-                cart.products = [...cart.products, updatedProduct];
+                updatedProduct = { id: id, qty: 1 };        //  ****  { product object gets its definition }
+                cart.products = [...cart.products, updatedProduct];     //  **** adding the updated product to the 'cart.products' array *****
             }
             cart.totalPrice = cart.totalPrice + +productPrice;
             fs.writeFile(p, JSON.stringify(cart), (err) => {
@@ -66,6 +66,17 @@ module.exports = class Cart {
             fs.writeFile(p, JSON.stringify(updatedCart), err => {
                 console.log(err);
             });
+        });
+    }
+
+    static getCart(cb) {        // need to get call-back function we will call, once we get the products
+        fs.readFile(p, (err, fileContent) => {
+           const cart = JSON.parse(fileContent);
+           if (err) {
+               cb(null);
+           } else {
+               cb(cart);
+           }
         });
     }
 };
