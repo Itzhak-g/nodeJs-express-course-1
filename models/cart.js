@@ -58,6 +58,9 @@ module.exports = class Cart {
             //let totalProductPrice = updatedCart[productIndex].qty * productPrice;
             //updatedCart.totalPrice = updatedCart.totalPrice - totalProductPrice;
             const product = updatedCart.products.find(prod => prod.id === id);
+            if (!product) {
+                return;
+            }
             const totalProductPrice = product.qty * productPrice;
             updatedCart.totalPrice = updatedCart.totalPrice - totalProductPrice;
 

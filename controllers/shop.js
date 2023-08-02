@@ -37,7 +37,7 @@ exports.getIndex = (req, res, next) => {
     });
 }
 
-// >->->->->->-> loading the Cart
+// >->->->->->-> loading the Cart products onto the cart.html (ejs) form (html page).
 exports.getCart = (req, res, next) => {
     Cart.getCart(cart => {
         // we just entered the first c-b function, to get the 'cart' parameter value ---
@@ -70,6 +70,15 @@ exports.postCart = (req, res, next) => {
     });
     res.redirect('/cart');   // load the get route - the cart page
 };
+
+exports.postCartDeleteProduct = (req, res, next) => {
+    const prodId = req.body.productId;
+    Product.findById(prodId, product => {      // need the price of the product. run the callback with the retrieved product
+        Cart.deleteProduct(prodId, product.price);
+        res.redirect('/cart');
+    });
+
+}
 
 exports.getOrders = (req, res, next) => {
     res.render('shop/orders.ejs', {

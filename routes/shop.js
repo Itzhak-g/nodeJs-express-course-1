@@ -20,6 +20,8 @@ router.get('/cart', shopController.getCart);        // get request -> used to di
 
 router.post('/cart', shopController.postCart);        // need new controller function..
 
+router.post('/cart-delete-item', shopController.postCartDeleteProduct);
+
 router.get('/orders', shopController.getOrders);
 
 router.get('/checkout', shopController.getCheckout);
