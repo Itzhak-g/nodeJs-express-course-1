@@ -1,13 +1,21 @@
 // const products = [];       We want to save our products to a file, not to array.
-const fs = require('fs');
-const path = require('path');
+const wwFile = true;
+const wwDb = false;
+
+if (wwFile) {
+    const fs = require('fs');
+    const path = require('path');
+}
 const Cart = require('./cart');
 
-const p = path.join(
-    path.dirname(process.mainModule.filename),
-    'data',
-    'products.json'
-);
+if (wwFile) {
+    const p = path.join(
+        path.dirname(process.mainModule.filename),
+        'data',
+        'products.json'
+    );
+}
+
 const getProductsFromFile = cb => {         // This is helper function ...
 
     fs.readFile(p, (err, fileContent) => {      // Asynchronous code..

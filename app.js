@@ -3,6 +3,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const errorController = require('./controllers/error');
+const db = require('./util/database');     // db is the pool that allows us to use a connection in it
 
 const app = express();  // express is doing a lot of things for us...
 
@@ -12,6 +13,14 @@ app.set('views', 'views');
 const adminRoutes = require('./routes/admin')
 const shopRoutes = require('./routes/shop.js');
 const path = require("path");
+
+/*db.execute('SELECT * FROM products')
+    .then(result => {
+        console.log(result[0], result[1]);
+    })
+    .catch(err => {
+        console.log('error: ',err)
+    });*/
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));       // static middleware, to enable access to the 'public' folder.
