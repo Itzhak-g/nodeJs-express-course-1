@@ -20,12 +20,10 @@
                         <div class="card__content">
                             <h2 class="product__price">$<%= product.price %></h2>
                             <p class="product__description"><%= product.description %></p>
-                            <p>(views/shop/index.ejs prod list)</p>
                         </div>
                         <div class="card__actions">
                                 <a href="/products/<%= product.id %>" class="btn">Details</a>
                             <%- include('../includes/add-to-cart.ejs', {product: product}) %>
-                                                                  <!--  lesson 122 ~ 07:00  -->
                         </div>
                     </article>
                 <% } %>

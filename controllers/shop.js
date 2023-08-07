@@ -5,37 +5,45 @@ const Product = require('../models/product');
 const Cart = require('../models/cart');
 
 exports.getProducts = (req, res, next) => {
-    Product.fetchAll((products) => {
-        res.render('shop/product-list.ejs', {
-            prods: products,
-            pageTitle: 'All Products',     // instead of docTitle..
-            path: '/products',
-        });
-    });
+  /*  Product.fetchAll((products) => {   */
+    Product.fetchAll()
+        .then(([rows, fieldData]) => {
+            res.render('shop/product-list.ejs', {
+                prods: rows,
+                pageTitle: 'All Products',     // instead of docTitle..
+                path: '/products',
+            });
+        })
+        .catch(err => console.log(err))
 };
 
 exports.getProduct = (req, res, next) => {      // getProduct-Id
     const prodId = req.params.productId;        // product ID
     console.log("The product Id: ", prodId);
-    Product.findById(prodId, product => {
-        console.log(product);
-        res.render('shop/product-detail', {     // views is the default path for viewing pages, ejs and html....
-            product: product,
-            pageTitle: product.title,
-            path: '/products'     //path: '/' (to be compatible with the section in navigation.ejs to mark navigation item as active.)
-        });                     // this is the path for which we want to mark the navigation item as active
-    })
+    // Product.findById(prodId, product => {
+    Product.findById(prodId)
+        .then(([product, fieldsData]) => {
+            res.render('shop/product-detail', {     // views is the default path for viewing pages, ejs and html....
+                product: product[0],
+                pageTitle: product[0].title,
+                path: '/products'     //path: '/' (to be compatible with the section in navigation.ejs to mark navigation item as active.)
+            });                     // this is the path for which we want to mark the navigation item as active
+        })
+        .catch(err => console.log(err));
 }
 
 exports.getIndex = (req, res, next) => {
-    Product.fetchAll((products) => {
-        res.render('shop/index.ejs', {     // path to the ejs (html) content file. likely not necessary to include the file name extension.. (ejs)
-            prods: products,
-            pageTitle: 'Shop-Index',     // instead of docTitle..
-            path: '/',
-        });
-    });
-}
+   /* Product.fetchAll((products) => {    */
+    Product.fetchAll()
+        .then(([rows, fieldData]) => {    // anonymous function  (it's not callback..)
+            res.render('shop/index.ejs', {     // path to the ejs (html) content file. likely not necessary to include the file name extension.. (ejs)
+                prods: rows,
+                pageTitle: 'Shop-Index',     // instead of docTitle..
+                path: '/',
+            });
+        })
+        .catch(err => console.log(err));
+};
 
 // >->->->->->-> loading the Cart products onto the cart.html (ejs) form (html page).
 exports.getCart = (req, res, next) => {

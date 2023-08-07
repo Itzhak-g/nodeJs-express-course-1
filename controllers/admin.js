@@ -26,10 +26,12 @@ exports.postAddProduct = (req, res, next) => {
     const description = req.body.description;
     //const product = new Product(req.body.title);   // from the form in add-product.ejs
     const product = new Product(null, title, imageUrl, description, price);
-    product.save();
+    product.save().then(() => {
+        res.redirect('/');
+    }).catch(err => console.log(err));
     //   console.log('req.body : ' , req.body);
     //   console.log('req.body.title [admin.js]: ' , req.body.title);
-    res.redirect('/');
+
     // next();
 }
 

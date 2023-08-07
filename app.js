@@ -3,7 +3,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const errorController = require('./controllers/error');
-const db = require('./util/database');     // db is the pool that allows us to use a connection in it
+const db = require('./util/database');     // db is the pool that allows us to use a connection in it.  (now not in use..)
 
 const app = express();  // express is doing a lot of things for us...
 
