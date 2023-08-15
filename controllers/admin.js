@@ -25,15 +25,30 @@ exports.postAddProduct = (req, res, next) => {
     const price = req.body.price;
     const description = req.body.description;
     //const product = new Product(req.body.title);   // from the form in add-product.ejs
-    const product = new Product(null, title, imageUrl, description, price);
-    product.save().then(() => {
-        res.redirect('/');
-    }).catch(err => console.log(err));
+    /* === due to start working with sequelize... :
+     const product = new Product(null, title, imageUrl, description, price);
+    product
+        .save()
+        .then(() => {
+            res.redirect('/');
+        })
+        .catch(err => console.log(err)); */
     //   console.log('req.body : ' , req.body);
     //   console.log('req.body.title [admin.js]: ' , req.body.title);
-
     // next();
-}
+
+    Product.create({
+        title: title,
+        price:price,
+        imageUrl: imageUrl,
+        description: description
+    }).then(result => {
+        // console.log('result is: ',result);   (eliminating tons of rows  :)
+        console.log('Product Created Successfully')
+    }).catch(err => {
+        console.log('error is: ',err);
+    });
+};
 
 // *-*-*-*-*-*-*-*-*-*-*-*-*-*-
 exports.getEditProduct = (req, res, next) => {       // getEditProduct => action name
@@ -42,7 +57,7 @@ exports.getEditProduct = (req, res, next) => {       // getEditProduct => action
         return res.redirect('/');
     }
     const prodId = req.params.productId;
-    Product.findById(prodId, product => {
+    Product.findByPk(prodId, product => {
         if (!product) {
             return res.redirect('/');
         }

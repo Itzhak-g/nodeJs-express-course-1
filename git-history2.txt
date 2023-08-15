@@ -1,0 +1,85 @@
+    1  exit
+    2* history [B
+    3  git config --global user.name "IkaG"
+    4* git config --global user.email "ikagolan7@gmail.com"[B
+    5  pwd
+    6  cd /d
+    7  pwd
+    8  ls
+    9  cd Training-files/
+   10  ls
+   11  cd git-tests/
+   12  ls
+   13  ls sites
+   14  cd ..
+   15  ls
+   16  cd code/
+   17  ls
+   18  cd NodeJs/
+   19  ls
+   20  cd nodejs-express
+   21  ls
+   22  git init
+   23  git status
+   24  git add -A
+   25  git add -A
+   26  git status
+   27  git rm --cached -A
+   28  git reset HEAD -- /d/Training-files/code/NodeJs/nodejs-express
+   29  git status
+   30  git init
+   31  touch .gitignor
+   32  ls -a
+   33  ls
+   34  ls -a
+   35  git status
+   36  git add -A
+   37  git status
+   38  git reset HEAD -- /d/Training-files/code/NodeJs/nodejs-express
+   39  git status
+   40  git add -A
+   41  git config core.autocrlf true
+   42  git status
+   43  git commit -m 'First commit of nodejs course ch128'
+   44  git remote set-url origin https://github.com/Itzhak-g/nodeJs-express-course-1.git
+   45  git remote -v
+   46  git remote set-url origin https://github.com/Itzhak-g/nodeJs-express-course-1.git
+   47  git remote -v
+   48  git remote
+   49  ls -a
+   50  git config --list --show-origin
+   51  git remote add origin https://github.com/Itzhak-g/nodeJs-express-course-1.git
+   52  git remote -v
+   53  git push origin main
+   54  git push origin master
+   55  git branch -M main
+   56  git push -u origin main
+   57  history
+   58  history > git-history.txt
+   59  git status
+   60  git add -A
+   61  git commit -m 'nodejs-express course eo ch129'
+   62  git status
+   63  git push -u origin main
+   64  git status
+   65  git add -A
+   66  git status
+   67  git commit -m 'nodejs-express course - eolesson 130 - Displaying Cart Items on Cart Page'
+   68  git push -u origin main
+   69  git status
+   70  git add -A
+   71  git status
+   72  git commit -m 'nodejs-express course - eolesson 132 - Fixing a Delete Product Bug'
+   73  git push -u origin main
+   74  git status
+   75  git status
+   76  git status
+   77  git add -A
+   78  git commit -m 'nodejs-express section10-less143-start - Fetching Products-SQL DB'
+   79  git push -u origin main
+   80  git status
+   81  git add -A
+   82  git status
+   83  git commit -m 'nodejs-express section10-SQL Introduction Completion'
+   84  git push -u origin main
+   85  history > git-history2.txt

@@ -1,3 +1,5 @@
+/*
+>>>  start working with sequelizing for connecting, working with the DB.  >>>
 // const products = [];       We want to save our products to a file, not to array.
 const wwFile = false;
 const wwDb = !wwFile;
@@ -58,7 +60,7 @@ module.exports = class Product {
                     });
                 }
             });
-            /*fs.readFile(p, (err, fileContent) => {     no need - using same name function in 'getProductsFromFile' function above
+            /!*fs.readFile(p, (err, fileContent) => {     no need - using same name function in 'getProductsFromFile' function above
                 // console.log(err);
                 // console.log(fileContent);
                 /!*  let products = [];     // >>>>> we do not need this logic...
@@ -69,7 +71,7 @@ module.exports = class Product {
                 fs.writeFile(p, JSON.stringify(products), (err) => {
                     console.log(err);
                 });*!/
-            });*/
+            });*!/
         } else {
             return db.execute(
                 'INSERT INTO products (title, price, imageUrl, description) VALUES (?, ?, ?, ?)', [this.title, this.price, this.imageUrl, this.description]
@@ -100,7 +102,7 @@ module.exports = class Product {
         //return this.products;    no products property in the class. only the external products array. that's why use instead - :
         // return products;     (before using file to save the products..)
         if (wwFile) {
-            /*const p = path.join(     >>>>>  refactoring the code - moved up to 'getProductsFromFile'.
+            /!*const p = path.join(     >>>>>  refactoring the code - moved up to 'getProductsFromFile'.
             path.dirname(process.mainModule.filename),
             'data',
             'products.json'
@@ -112,17 +114,17 @@ module.exports = class Product {
             }
             //return JSON.parse(fileContent);
             cb(JSON.parse(fileContent));
-        });*/
+        });*!/
             // return products;
             getProductsFromFile(cb);
         } else {
             return db.execute('SELECT * FROM products');
-                /*.then(result => {     being skipped for a while...
+                /!*.then(result => {     being skipped for a while...
                     console.log(result[0], result[1]);
                 })
                 .catch(err => {
                     console.log('Have an error: ',err)
-                });*/
+                });*!/
         }
     }
 
@@ -137,3 +139,32 @@ module.exports = class Product {
         }
     }
 };
+*/
+const Sequelize = require('sequelize');
+
+const sequelize = require('../util/database');
+
+// Product Model Follows:
+const Product = sequelize.define('product', {
+    id: {
+        type: Sequelize.INTEGER,
+        autoIncrement: true,
+        allowNull: false,
+        primaryKey: true
+    },
+    title: Sequelize.STRING,
+    price: {
+        type: Sequelize.DOUBLE,
+        allowNull: false
+    },
+    imageUrl: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    description: {
+        type: Sequelize.STRING,
+        allowNull: false
+    }
+});
+
+module.exports = Product;

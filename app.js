@@ -3,7 +3,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const errorController = require('./controllers/error');
-const db = require('./util/database');     // db is the pool that allows us to use a connection in it.  (now not in use..)
+/*const db = require('./util/database');     // db is the pool that allows us to use a connection in it.  (now not in use..)*/
+
+const sequelize = require('./util/database');
 
 const app = express();  // express is doing a lot of things for us...
 
@@ -30,9 +32,19 @@ app.use(shopRoutes);
 
 app.use(errorController.get404Page);
 
+sequelize
+    .sync()
+    .then(result => {
+        // console.log('result =: ' ,result);
+        app.listen(3002);
+    })
+    .catch(err => {
+        console.log('err =: ' ,err);
+    });
+
 /*
 const server = http.createServer(app);  // 'app' can definitely serve as a valid request handler for us.
 server.listen(3002);
 */
 // using instead ->
-app.listen(3002);
+// app.listen moved from here to line 39, to the promise - result portion.
