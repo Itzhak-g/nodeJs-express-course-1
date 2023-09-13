@@ -1,0 +1,19 @@
+    1  exit
+    2  pwd
+    3  cd /d
+    4  cd Training-files/
+    5  ls
+    6  cd code/
+    7  ls
+    8  cd NodeJs/
+    9  ls
+   10  cd nodejs-express
+   11  pwd
+   12  ls
+   13  git status
+   14  git add -A
+   15  git status
+   16  git commit -m 'nodejs-express 157-Getting a Single Product with the "where" Condition'
+   17  git push -u origin main
+   18  history
+   19  history > hist-3.txt

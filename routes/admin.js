@@ -13,13 +13,14 @@ const router = express.Router();
     //   /admin/add-product    ==> GET       ***
 router.get('/add-product', adminController.getAddProduct);   // referring to products controller
 
-    //   /admin/add-product    ==> GET       &&&
-router.get('/products', adminController.getProducts);
+    //    (/admin/add-product)   ==> GET       &&&
+router.get('/products23', adminController.getProducts);    // 23
 
     //   /admin/add-product      ==> POST
 router.post('/add-product',adminController.postAddProduct);  // referring to products controller
 
-router.get('/edit-product/:productId' ,adminController.getEditProduct);
+router.get('/edit-product/:productId' ,adminController.getEditProduct);     // to load the edited product info, using its Id in the url address.
+                                                                                 // .... After editing we will post the updated product to save it.
 
 router.post('/edit-product', adminController.postEditProduct);
 

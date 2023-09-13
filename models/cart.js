@@ -1,4 +1,5 @@
 // starting lesson 123 -
+/*
 const fs = require('fs');
 const path = require('path');
 
@@ -9,7 +10,7 @@ const p = path.join(
 );
 
 module.exports = class Cart {
-    /*  constructor() {
+    /!*  constructor() {
         this.products = [];
         this.totalPrice = 0;
     }
@@ -18,7 +19,7 @@ module.exports = class Cart {
     Fetch the previous cart
     Analyze the cart => Find existing product
     Add new product or increase quantity of existing product
- */
+ *!/
     static addProduct(id, productPrice) {
         // Fetch the previous cart
         fs.readFile(p, (err, fileContent) => {
@@ -83,4 +84,17 @@ module.exports = class Cart {
         });
     }
 };
+*/
 
+const Sequelize = require('sequelize');         // importing sequelize package
+const sequelize = require('../util/database');      // import sequelize from our database file
+const Cart = sequelize.define('cart', {       // creating the cart model
+    id: {                       // is the cart ID
+        type: Sequelize.INTEGER,
+        autoIncrement: true,
+        allowNull: false,
+        primaryKey: true
+    }
+});
+
+module.exports = Cart;

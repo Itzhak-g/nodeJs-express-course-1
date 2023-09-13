@@ -36,7 +36,7 @@
                                         <button class="btn">Add to Cart</button>
                                         <input type="hidden" name="productId" value="<%= product.id%>">
                                     </form>-->
-                                    <%- include('../includes/add-to-cart.ejs', {product: product}) %>
+                                    <%- include('../includes/add-to-cart.ejs', {product: product}) %>  <!-- passing 'product' as parameter to 'add-to-cart.ejs' -->
                                     <!-- let [loop] product objects of prods pass into the includes function  -->
                                 </div>
                             </article>
