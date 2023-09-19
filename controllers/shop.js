@@ -208,9 +208,11 @@ exports.postCartDeleteProduct = (req, res, next) => {       /// Deleting a produ
 }
 
 exports.postOrder = (req, res, next) => {
+    let fetchedCart;
     req.user
         .getCart()
         .then(cart => {
+            fetchedCart = cart;
             return cart.getProducts();
         })
         .then(products => {
@@ -227,6 +229,9 @@ exports.postOrder = (req, res, next) => {
                 })
         })
         .then(result => {
+            return fetchedCart.setProducts(null);
+        })
+        .then(result => {
             res.redirect('/orders');
         })
         .catch(err => console.log('error posting new order: ', err));
@@ -234,15 +239,22 @@ exports.postOrder = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-    res.render('shop/orders.ejs', {
-        path: '/orders',
-        pageTitle: 'Your Orders'
-    } );
-}
+    req.user.getOrders({include: ['products']})
+    .then( orders => {
+        console.log('testing orders:: ', orders);
+        res.render('shop/orders.ejs', {
+            path: '/orders',
+            pageTitle: 'Your Orders',
+            orders: orders
+        } );
+    })
+    .catch(err => console.log('error getting Orders: ', err));
+};
 
+/*
 exports.getCheckout = (req, res, next) => {
     res.render('shop/checkout', {
         path: '/checkout',
         pageTitle: 'Checkout'
     });
-}
+}*/
