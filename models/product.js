@@ -140,11 +140,100 @@ module.exports = class Product {
     }
 };
 */
-const Sequelize = require('sequelize');
+/*** const Sequelize = require('sequelize');    // we are not using sequelize in the class anymore
+  const sequelize = require('../util/database');     // we are not using sequelize in the class anymore ***/
+// const mongoConnect = require('../util/database');
+const mongodb = require('mongodb');
+// const {static} = require("express");
+const getDb = require('../util/database').getDb;    // facilitating the database connection, to access the db...
 
-const sequelize = require('../util/database');
+class Product {
+    constructor(title, price, description, imageUrl, id, userId) {
+        // even if we are not passing id when creating new product,
+        // and we are not intended to do it, because mongoDb is doing it anyway, when creating new document,
+        // so down in the if statement, this._id is always being defined..
+        this.title = title;
+        this.price = price;
+        this.description = description;
+        this.imageUrl = imageUrl;
+        this.userId = userId;
+        // this._id = id;   now, after modifying the id in the controller, need to change the 'id' to mongodb.ObjectId(id)..
+        this._id = id ? new mongodb.ObjectId(id) : null ;    // This is a better approach...
+    }
+    save() {
+        const db = getDb();
+        let dbOp;
+        if (this._id) {
+            // updating the product
+            dbOp = db.collection('products')
+                // .updateOne({ _id: new mongodb.ObjectId(this._id) }, { $set: this });    // there is also option to update many -> .updateMany();
+                .updateOne({ _id: this._id }, { $set: this });
+        } else {                                      // we can also use the following code - { $set: { title: this.title, price: this.price ... } }
+            // inserting the product
+            dbOp = db.collection('products').insertOne(this);
+        }
 
+        //db.collection('products').insertMany([]);
+        //db.collection('products').insertOne({name: 'A Book', price: 12.99});
+                                            // { javascript object }
+        return dbOp
+            .then(result => {
+                console.log('Result collection product insertion action : ', result);
+            })
+            .catch(err => {
+                console.log('Error collection product insertion action : ', err);
+            });
+    }
+
+    static fetchAll() {
+        //return db.collection('products').find({title: 'A Book'});   -> example for the 'find' search attributes / parameters
+        const db = getDb();
+        return db
+            .collection('products')
+            .find()      // finding all products
+            .toArray()
+            .then(products => {
+                console.log('fetched products: ', products);
+                return products;
+            })
+            .catch(err => {
+                console.log ('error fetching out all products ' , err);
+            });
+    }
+
+    static findById(prodId) {
+        const db = getDb(); // get access to the db connection we have.
+        return db
+            .collection('products')
+            // .find({_id: prodId})
+            .find({_id: new mongodb.ObjectId(prodId)})
+            .next()
+            .then(product => {
+                console.log('retrieved product: ' , product);
+                return product;
+            })
+            .catch(err => {
+                console.log('error retrieving single product from Mongo-db: ', err);
+            });
+    }
+
+    static deleteById(prodId) {
+        const db = getDb();     // need access-connection to the db
+        return db
+            .collection('products')
+            .deleteOne({ _id: new mongodb.ObjectId(prodId) })
+            .then(result =>
+                { console.log('Deleted! result: ', result);
+                }
+            )
+            .catch(err =>
+                { console.log('Error deleting a product: ', err);
+                }
+            );
+    }
+}
 // Product Model Follows:
+/* ****  Using Sequelize ****
 const Product = sequelize.define('product', {
     id: {
         type: Sequelize.INTEGER,
@@ -166,5 +255,6 @@ const Product = sequelize.define('product', {
         allowNull: false
     }
 });
+* ****/
 
 module.exports = Product;

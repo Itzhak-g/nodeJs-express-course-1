@@ -11,21 +11,21 @@ const router = express.Router();
 // const products = [];     [moved to products controller..]
 
     //   /admin/add-product    ==> GET       ***
-router.get('/add-product', adminController.getAddProduct);   // referring to products controller
+router.get('/add-product', adminController.getAddProduct);   // referring to products controller  ****!!!!
 
     //    (/admin/add-product)   ==> GET       &&&
-router.get('/products23', adminController.getProducts);    // 23
+router.get('/products', adminController.getProducts);   // 23 ****
 
     //   /admin/add-product      ==> POST
 router.post('/add-product',adminController.postAddProduct);  // referring to products controller
 
+//   ****  Not used with MongoDb No-SQL  ****
 router.get('/edit-product/:productId' ,adminController.getEditProduct);     // to load the edited product info, using its Id in the url address.
                                                                                  // .... After editing we will post the updated product to save it.
-
 router.post('/edit-product', adminController.postEditProduct);
 
 router.post('/delete-product', adminController.postDeleteProduct);
-
+// ****
 /*
  --- don't erase ---
 exports.routes = router;        -> as we are doing it in the shop.js file.

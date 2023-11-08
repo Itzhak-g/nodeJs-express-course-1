@@ -1,9 +1,12 @@
+// const mongodb = require('mongodb');    we don't need to create the ObjectId in this file, creating it in the product constructor-model instead..
 const Product = require("../models/product");
+
+// const ObjectId = mongodb.ObjectId;     we don't need to create the ObjectId in this file, creating it in the product constructor-model instead..
 
 exports.getAddProduct = (req, res, next) => {
     //console.log('1) In [/add-product] - - -');
     // res.send('<h2>The "Add Product" Page</h2><form action="/admin/add-product" method="POST"><input type="text" name="title"><button type="submit">Submit</button> </form>')
-    // 'action', The url to which the request should be sent.
+    // 'action', The url to which the request should be sent.       * * * * * * * * * ------- # # # # # # # # # # #
     // res.sendFile(path.join(__dirname, '..', 'views', 'add-product.html'));    replaced by the following line ->
     //  console.log('rootDir in /admin/add-product path: ' ,rootDir);
     //   res.sendFile(path.join(rootDir, 'views', 'add-product.html'));
@@ -20,7 +23,7 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
-    const title = req.body.title;
+    const title = req.body.title;       // receiving it from the ejs file-form..
     const imageUrl = req.body.imageUrl;
     const price = req.body.price;
     const description = req.body.description;
@@ -36,6 +39,7 @@ exports.postAddProduct = (req, res, next) => {
     //   console.log('req.body : ' , req.body);
     //   console.log('req.body.title [admin.js]: ' , req.body.title);
     // next();
+/* ****  used when running with Sequelize  ****
     req.user
         .createProduct({
             title: title,
@@ -43,27 +47,41 @@ exports.postAddProduct = (req, res, next) => {
             imageUrl: imageUrl,
             description: description
         })
+        ***** */
+    const product = new Product(
+        title,
+        price,
+        description,
+        imageUrl,
+        null,
+        req.user._id
+    );
+    product
+        .save()
+    /* -*-*-*-*-*-*-*-* £££££££££ */
         .then(result => {
             // console.log('result is: ',result);   (eliminating tons of rows  :)
-            console.log('Product Created Successfully')
-            res.redirect('/admin/products');
+            console.log('Product Created Successfully ' , result);
+            res.redirect('/admin/products');        // once/after the new product is saved, the system redirects to Admin Product html (/admin/products.ejs)
         })
         .catch(err => {
             console.log('error is: ',err);
         });
 };
 
-// *-*-*-*-*-*-*-*-*-*-*-*-*-*-
+// ****  Using SQL - Sequelize  ****  now updating it for mongoDb  ****
 exports.getEditProduct = (req, res, next) => {       // getEditProduct => action name - That's NOT Correct !!!!!! Action name is the rout (path).
-    const editMode = req.query.edit;
+    const editMode = req.query.edit;       // This rout-function responsible for fetching the product that's going to be edited and rendering it.
     if (!editMode) {
         return res.redirect('/');
     }
     const prodId = req.params.productId;
-    req.user.getProducts({where: {id: prodId} })   // retrieving 'prodId' products for a specific user...
- //   Product.findByPk(prodId)
-        .then(products => {
-            const product = products[0];
+    /* req.user
+        .getProducts({where: {id: prodId} })   // retrieving 'prodId' products for a specific user... */
+    Product.findById(prodId)
+    //   Product.findByPk(prodId)
+        .then(product => {    // products => {
+                              // const product = products[0];
             if (!product) {
                 return res.redirect('/');
             }
@@ -83,7 +101,6 @@ exports.getEditProduct = (req, res, next) => {       // getEditProduct => action
         });
 };
 
-
 // =*=*=*=*=*=*=*=*=*=* before - w/o promise (.then .catch) =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
   /*  Product.findByPk(prodId, product => {
         if (!product) {
@@ -100,25 +117,39 @@ exports.getEditProduct = (req, res, next) => {       // getEditProduct => action
         });
     });*/
 
-exports.postEditProduct = (req, res, next) => {
+exports.postEditProduct = (req, res, next) => {     // responsible for saving the edited product to the DB.
     const prodId = req.body.productId;
     const updatedTitle = req.body.title;
     const updatedImageUrl = req.body.imageUrl;
     const updatedPrice = req.body.price;
     const updatedDesc = req.body.description;
-    Product.findByPk(prodId)    // --- first promise
-        .then(product => {
-            product.title = updatedTitle;
-            product.imageUrl = updatedImageUrl;
-            product.price = updatedPrice;
-            product.description = updatedDesc;
-            return product.save();     // --- second promise ---. Method provided by Sequelize. Only this causes the updated record to be saved in the DB.
+    // Product.findByPk(prodId)    // --- first promise
+        // .then(productData => {   // .then(product => {
+            // product.title = updatedTitle;
+            // product.imageUrl = updatedImageUrl;
+            // product.price = updatedPrice;
+            // product.description = updatedDesc;
+        const product = new Product(
+            updatedTitle,
+            updatedPrice,
+            updatedDesc,
+            updatedImageUrl,
+            // new ObjectId(prodId)      we don't need to create the ObjectId in this file, creating it in the product constructor (model) instead..
+            prodId                   //   passing prodId string; Looks like this should and is, the original prodId of edited product
+        );
+            // return product.save();     // --- second promise ---. Method provided by Sequelize. Only this causes the updated record to be saved in the DB.
                 // return the promise which is return by the save function.
-        })
-        .then(result => {       // handling any success responses from the save promise.
-            console.log('PRODUCT UPDATED!');
-        })
-        .catch(err => console.log(err));    // will catch any errors for both promises
+        // })
+        product
+            .save()
+            .then(result => {       // --- second promise. Handling any success responses from the save promise.
+                console.log('PRODUCT UPDATED >>> ', result);
+                res.redirect('/admin/products');  // In case the product looks to not being updated on the html screen (page),
+                // we may need to move the 'redirect' instruction up, putting it inside the second '.then (result)' block, immediately following the: 'console.log('PRODUCT UPDATED!')'.
+                // This is because the redirect takes place before the first promise (of saving the changes) is done.
+                // This also means in case of an error, we never load a new page. Not the best user experience.
+            })
+            .catch(err => console.log(err));    // will catch any errors for both promises
 
     /*const updatedProduct = new Product(
         prodId,
@@ -128,34 +159,33 @@ exports.postEditProduct = (req, res, next) => {
         updatedPrice
     );
     updatedProduct.save(); */      // good to add a callback to make sure we are re-directing only in the case of no errors.
-    res.redirect('/admin/products');  // In case the product looks to not being updated on the html screen (page),
-        // we may need to move the 'redirect' instruction up, putting it inside the second '.then (result)' block, immediately following the: 'console.log('PRODUCT UPDATED!')'.
-    // This is because the redirect takes place before the first promise (of saving the changes) is done.
-    // This also means in case of an error, we never load a new page. Not the best user experience.
+
 };
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * *
 exports.postDeleteProduct = (req, res, next) => {
     const prodId = req.body.productId;      // The product-id belongs to the current user-id being logged only...
-    console.log('product id is: ', prodId);
-    //Product.destroy({where: Id = prodId});    -> this is one option. the other one is:
-    Product.findByPk(prodId)
-        .then(product => {
-            return product.destroy();
-        })
-        .then(result => {
+    console.log('product id to be deleted is: ', prodId);
+    // Product.destroy({where: Id = prodId});    -> part of Sequelize... this is one option. the other one is:
+    // Product.findByPk(prodId)
+    Product.deleteById(prodId)
+        /*.then( () => {     // then( product => {
+            return product.destroy();      // likely, belongs to Sequelize...
+        })  */
+        .then( () => {       // .then( result => {
             console.log('PRODUCT DESTROYED');
             res.redirect('/admin/products');
         })
-        .catch(err => console.log(err));
+        .catch(err => console.log('Error Deleting by _id : ' ,err));
+
 /*    Product.deleteById(prodId);       // good to add a callback to make sure we are re-directing only in the case of no errors.
-    res.redirect('/admin/products');    // deleteById does not exist in the Sequelize world*/
+    res.redirect('/admin/products');    // deleteById does not exist in the Sequelize world   */
 };
 
 exports.getProducts = (req, res, next) => {
-//    Product.findAll()
-    req.user
-        .getProducts()
+    //Product.findAll()
+    Product.fetchAll()
+    // req.user
+    //    .getProducts()
         .then(products => {
             res.render('admin/products.ejs', {  // path to the file that contains the ejs content    // likely not necessary to include the file name extension.
                 prods: products,
@@ -163,7 +193,7 @@ exports.getProducts = (req, res, next) => {
                 path: '/admin/products',        //  url address
             });
         })
-        .catch(err => console.log(err));
+        .catch(err => console.log('Error retrieving all products in controllers/admin file: ' , err));
 
     /*Product.fetchAll(products => {
         res.render('admin/products.ejs', {  // path to the file that contains the ejs content    // likely not necessary to include the file name extension.

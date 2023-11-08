@@ -1,10 +1,15 @@
 // const http = require('http');  --->>> no need for that due to the 'app.listen(3002)' command.
+const path = require("path");    // likely we don't need this line.
 
 const express = require('express');
 const bodyParser = require('body-parser');
 const errorController = require('./controllers/error');
 /* const db = require('./util/database');     // db is the pool that allows us to use a connection in it.  (now not in use..) */
 
+const mongoConnect = require('./util/database').mongoConnect;
+const User = require('./models/user');
+
+/****** Start working with NoSQL Mongo DB -> we don't need for all dependencies we needed when working with SQL and Sequelize ******
 const sequelize = require('./util/database');
 const Product = require('./models/product');
 const User = require('./models/user');
@@ -12,15 +17,16 @@ const Cart = require('./models/cart');          // *** Cart package being import
 const CartItem = require('./models/cart-item');
 const Order = require('./models/order');
 const OrderItem = require('./models/order-item');
+*/
 
 const app = express();  // express is doing a lot of things for us...
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
-const adminRoutes = require('./routes/admin')
+
+const adminRoutes = require('./routes/admin')    // ***
 const shopRoutes = require('./routes/shop.js');
-const path = require("path");
 
 /*db.execute('SELECT * FROM products')
     .then(result => {
@@ -34,19 +40,32 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));       // static middleware, to enable access to the 'public' folder.
 
 app.use((req, res, next) => {
-    User.findByPk(1)
+  // ---- Instructor also commented out following lines related to finding User by id (Pk) - now comment them back in them. ----
+    // User.findByPk(1)    // used when working with sequelize or with mySQL.
+    User.findById('65397d9a40ce5cdc7803bdba')
         .then(user => {
-            req.user = user;   // saving sequelize object with all its methods (find, create, destroy). not just the javascript object with its fields.
+            req.user = user;   // !!!saving sequelize object with all its methods (find, create, destroy). not just the javascript object with its fields.
             next();
         })
-        .catch(err => {console.log('error finding user on startup' , err)});
+        .catch(err => {console.log('error finding user on startup ' , err)});
+    // next();    >>> duplicate! should be removed..
 });
 
-app.use('/admin', adminRoutes);       // not calling the function, but the object itself (without parentheses).
+app.use('/admin', adminRoutes);       // *** not calling the function, but the object itself (without parentheses).
 app.use(shopRoutes);
+
 
 app.use(errorController.get404Page);
 
+// mongoConnect((client) => {    // a function that will get executed once we connect it
+//   we don't get the 'client' here, since the mongoConnect function in database.js file, does not send it anymore.
+    mongoConnect(() => {
+    // console.log(client);
+        app.listen(3002);
+});
+
+/*
+**** Following lines have been removed after switching to work with NoSQL Mongo DB ****
 Product.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});  // on deletion of user, its products will be deleted as well.
                         // Will add a field of user-id to a Product record, specifying the user-id the Product 'belongs' to.
 User.hasMany(Product);
@@ -82,6 +101,7 @@ sequelize
     .catch(err => {
         console.log('user-cart err = ', err);
     });
+*/
 
 /* A model can be synchronized with the database by calling model.sync(options) , an asynchronous function (that returns a Promise).
 With this call, Sequelize will automatically perform an SQL query to the database.
@@ -93,3 +113,4 @@ server.listen(3002);
 */
 // using instead ->
 // app.listen moved from here to line 39, to the promise - result portion.
+

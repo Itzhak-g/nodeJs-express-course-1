@@ -28,7 +28,7 @@
                                     <p>(views/shop/product-list.ejs)</p>
                                 </div>
                                 <div class="card__actions">
-                                    <a href="/products/<%= product.id %>" class="btn">Details</a>
+                                    <a href="/products/<%= product._id %>" class="btn">Details</a>        <!-- changed to 'product._id' - to match mongoDb -->
                                     <!-- 'dynamic segment' > To display the Product Details page (routs/shop.js -
                                          router.get('/products/:productId',res.render('shop/product-detail',
                                          shopController.getProduct); -->

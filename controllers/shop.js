@@ -5,8 +5,8 @@ const Product = require('../models/product');
 // const {getProducts} = require("./admin");   not clear why is this showing up here...
 // const Order = require('../models/order');   -> we won't be needing this either..
 
-exports.getProducts = (req, res, next) => {
-    Product.findAll()
+exports.getProducts = (req, res, next) => {     // getProducts, meaning all products.
+    Product.fetchAll()                // .findAll()  <<< used while using Sequelize...
         .then(products => {
             res.render('shop/product-list.ejs', {
                 prods: products,
@@ -30,8 +30,8 @@ exports.getProducts = (req, res, next) => {
         .catch(err => console.log(err))*/
 };
 
-exports.getProduct = (req, res, next) => {      // getProduct-Id  for: 'product details'.
-    const prodId = req.params.productId;        // product ID
+exports.getProduct = (req, res, next) => {      // meaning retrieving just a single product. getProduct-Id  for: 'product details'.
+    const prodId = req.params.productId;        // getting the product ID as part of the URL
     //console.log("The product Id: ", prodId);
 
     /*Product.findAll({where: {id: prodId} })   // by default 'findAll' gives us multiple items, per definition..
@@ -45,8 +45,8 @@ exports.getProduct = (req, res, next) => {      // getProduct-Id  for: 'product 
             });                     // this is the path for which we want to mark the navigation item as active
         })
         .catch(err => console.log(err));*/
-    // Product.findById(prodId    ++>> from some reason 'findById' does not work!
-    Product.findByPk(prodId)
+    Product.findById(prodId)  //  +++ >> from some reason 'findById' does not work with MySQL! instead working with 'findByPk', one line below.
+    // Product.findByPk(prodId)        // used when working with my MySQL
         //.then(([product, fieldsData]) => {
         //.then(([product, fieldsData]) => {
         .then(product => {
@@ -74,7 +74,7 @@ exports.getIndex = (req, res, next) => {
         })
         .catch(err => console.log(err));  */
 
-    Product.findAll()
+    Product.fetchAll()          //  +++ >>>  .findAll()  <<< used when using Sequelize...
         .then(products => {
             res.render('shop/index.ejs', {
                 prods: products,
