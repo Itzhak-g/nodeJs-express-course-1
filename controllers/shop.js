@@ -11,11 +11,11 @@ exports.getProducts = (req, res, next) => {     // getProducts, meaning all prod
             res.render('shop/product-list.ejs', {
                 prods: products,
                 pageTitle: 'All Products',     // instead of docTitle..
-                path: '/products',
+                path: '/products'
             });
         })
         .catch(err => {
-            console.log(err)
+            console.log(err);
         });
     /*  ---------------- used ^|^|^ before -------------------
       Product.fetchAll((products) => {
@@ -31,7 +31,7 @@ exports.getProducts = (req, res, next) => {     // getProducts, meaning all prod
 };
 
 exports.getProduct = (req, res, next) => {      // meaning retrieving just a single product. getProduct-Id  for: 'product details'.
-    const prodId = req.params.productId;        // getting the product ID as part of the URL
+    const prodId = req.params.productId;        // getting the product ID as part (the suffix) of the URL
     //console.log("The product Id: ", prodId);
 
     /*Product.findAll({where: {id: prodId} })   // by default 'findAll' gives us multiple items, per definition..
@@ -90,29 +90,27 @@ exports.getIndex = (req, res, next) => {
 // >-#>-#>-#>-#>-#>-#>-# >-# >-# >-# >-# >-# >-# >-# >-# >-# - - - loading the Cart products data onto the cart.html (ejs) form (html page). pretty simple..
 exports.getCart = (req, res, next) => {
     console.log('req.user: ', req.user);     // just for understanding...
-    console.log('req.user.cart :>> ', req.user.cart);   // still gives us undefined.
+    console.log('req.user.cart :>> ', req.user.cart);   // ?? still gives us undefined.
     req.user
-        .getCart()    // Cart, hence 'getCart', are associated to user. Cart belongs to User !
-        .then(cart => {
-            console.log('cart [after running req.user.getCart()] :>> ', cart);   // It gives 'null' after trying to retrieve cart from 'req.user.cart'.
-            return cart                                                 // But after running req.use.getCart we get a valid cart.
+        .getCart()    // Cart, hence 'getCart', are associated to user. Cart belongs to A User !
+        // .then(cart => {
+        .then(products => {
+            console.log('cart [after running req.user.getCart()] :>> ', products);   // It gives 'null' after trying to retrieve cart from 'req.user.cart'.
+            /*return cart                                                 // But after running req.use.getCart we get a valid cart.
                 .getProducts()   // Since cart is associated to products. Can be multiple products.
-                .then(products => {
+                .then(products => {*/
                     res.render('shop/cart', {   // cart.ejs file under views/shop/
                         path: '/cart',     // url
                         pageTitle: 'Your Cart',
                         products: products
-                    })
-                })
-                .catch(err => {
-                    console.log('errors getting cart-Products : ', err);
-                })
+                    });
         })
-        .catch(err => {
-            console.log('error retrieving user-Cart : ', err);
-        });
+                .catch(err => console.log('errors getting cart-Products : ', err));
 }
-    /*Cart.getCart(cart => {    // updating - working with Sequelize instead...
+/*        .catch(err => console.log('error retrieving user-Cart : ', err));
+};*/
+
+    /* Cart.getCart(cart => {    // updating - working with Sequelize instead...
         // we just entered the first c-b function, to get the 'cart' parameter value ---
         Product.fetchAll(products => {
             // This is (we are inside -- ) the (second) call-back function..
@@ -133,16 +131,27 @@ exports.getCart = (req, res, next) => {
         });
 
     });
-}*/
+} */
 // *-*-*-*-*-*--*-*-*-*-*-*-*-   *-*-*-*-*-*-*-*-*-*-*-*-*-    *-*-*-*-*-*-*-*-*-
 // PostCart deals when user adds a new product to a cart. This may happen in one of two cases:
 //   1) when no product exists in the cart so this is the first product to be added to the cart,
 //   2) there are some products already existing in the cart, prior the new product is going to be added.
 //   3) In any way this is not related to the products representation on the screen which is the job of the getCard method.
+// postCart = > Allows for adding elements to carts -
+exports.postCart = (req, res, next) => {   // product-id is included in the post message parameters sent from the html form.
+    const prodId = req.body.productId;     // we want to add a product to a cart.  <input type="hidden" name="productId"
+                                                    // value="<%= product._id%>">  <!-- 'name' is the  -->
+    Product.findById(prodId)
+        .then(product => {
+            return req.user.addToCart(product);
+        })
+        .then(result => {
+            console.log('result of adding product to cart :>> ', result)
+            res.redirect('/cart');
+        });
 
-exports.postCart = (req, res, next) => {   // product-id is included the post message parameters sent from the html form.
-    const prodId = req.body.productId;     // we want to add a product to a cart.
-    let fetchedCart;  // a temporary global variable used to hold the cart var-data, making it available everywhere - in all methods.
+    // Not needed when working with MongoDB :
+    /* let fetchedCart;  // a temporary global variable used to hold the cart var-data, making it available everywhere - in all methods.
     let newQuantity = 1;
     req.user
         .getCart()
@@ -174,21 +183,30 @@ exports.postCart = (req, res, next) => {   // product-id is included the post me
             res.redirect('/cart');
         })
         .catch(err => console.log('error getting cart & products in postCart method : ', err));
-
-    /*const prodId = req.body.productId;   // (retrieving the product-Id from the incoming request compatible with name property in the post request (productId))
+*/
+    /* const prodId = req.body.productId;   // (retrieving the product-Id from the incoming request compatible with name property in the post request (productId))
     console.log("Product-Id --- " , prodId);
     Product.findByPk(prodId, (product) => {
         Cart.addProduct(prodId, product.price);
     });
-    res.redirect('/cart');   // load the get route - the cart page*/
+    res.redirect('/cart');   // load the get route - the cart page */
 };
 
 exports.postCartDeleteProduct = (req, res, next) => {       /// Deleting a product from the cart.
     const prodId = req.body.productId;
     req.user
+        .deleteItemFromCart(prodId)
+        .then(result => {
+            res.redirect('/cart');
+        })
+        .catch(err => console.log('error deleting cart.item :> ', err));
+
+// =================== Sequelize (most likely) =====================
+    /* const prodId = req.body.productId;
+    req.user
         .getCart()
         .then(cart => {
-            return cart.getProducts({ where : { id: prodId } });
+            return cart.getProducts({ where : { id: prodId } });    // calling db cart.getProducts
         })
         .then(products => {
             const product = products[0];
@@ -197,7 +215,7 @@ exports.postCartDeleteProduct = (req, res, next) => {       /// Deleting a produ
         .then(result => {
             res.redirect('/cart');
         })
-        .catch(err => console.log('error finding/deleting the product to be deleted: ', err));
+        .catch(err => console.log('error finding/deleting the product to be deleted: ', err)); */
 /*
     Product.findByPk(prodId, product => {      // need the price of the product. run the callback with the retrieved product
         Cart.deleteProduct(prodId, product.price);
@@ -235,12 +253,12 @@ exports.postOrder = (req, res, next) => {
             res.redirect('/orders');
         })
         .catch(err => console.log('error posting new order: ', err));
-
 };
 
 exports.getOrders = (req, res, next) => {
-    req.user.getOrders({include: ['products']})
-    .then( orders => {
+    req.user
+      .getOrders({ include: ['products'] })
+      .then( orders => {
         console.log('testing orders:: ', orders);
         res.render('shop/orders.ejs', {
             path: '/orders',

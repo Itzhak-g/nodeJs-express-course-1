@@ -36,15 +36,18 @@ const shopRoutes = require('./routes/shop.js');
         console.log('error: ',err)
     });*/
 
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({extended: false}));      // The body-parser package is used to get data from the request body in an Express server
 app.use(express.static(path.join(__dirname, 'public')));       // static middleware, to enable access to the 'public' folder.
 
 app.use((req, res, next) => {
   // ---- Instructor also commented out following lines related to finding User by id (Pk) - now comment them back in them. ----
     // User.findByPk(1)    // used when working with sequelize or with mySQL.
-    User.findById('65397d9a40ce5cdc7803bdba')
+    // User.findById('65397d9a40ce5cdc7803bdba')
+    User.findById('655261a874c7325478c4c0de')
         .then(user => {
-            req.user = user;   // !!!saving sequelize object with all its methods (find, create, destroy). not just the javascript object with its fields.
+            // req.user = user;   // This includes saving object's properties only. Because we are getting the user object from the DB.
+                              // [Not necessarily true in the case of Sequelize..]
+            req.user = new User(user.name, user.email, user.cart, user._id);   // user._id is copied from the db.
             next();
         })
         .catch(err => {console.log('error finding user on startup ' , err)});

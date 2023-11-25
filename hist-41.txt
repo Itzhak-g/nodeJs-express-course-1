@@ -1,0 +1,40 @@
+    1  exit
+    2  pwd
+    3  cd /d
+    4  cd Training-files/
+    5  ls
+    6  cd code/
+    7  ls
+    8  cd NodeJs/
+    9  ls
+   10  cd nodejs-express
+   11  pwd
+   12  ls
+   13  git status
+   14  git add -A
+   15  git status
+   16  git commit -m 'nodejs-express 157-Getting a Single Product with the "where" Condition'
+   17  git push -u origin main
+   18  history
+   19  history > hist-3.txt
+   20  exit
+   21  cd
+   22  pwd
+   23  /d/
+   24  pwd
+   25  d:
+   26  cd /d
+   27  pwd
+   28  ls
+   29  cd Training-files/
+   30  cd code/
+   31  cd NodeJs/
+   32  cd nodejs-express
+   33  pwd
+   34  history > hist-4.txt
+   35  git status
+   36  git add -A
+   37  git status
+   38  git commit -m 'nodejs-express section12-eo lesson 195 Storing the User in our DB'
+   39  git push -u origin main
+   40  history > hist-41.txt
