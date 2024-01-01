@@ -48,6 +48,8 @@ exports.postAddProduct = (req, res, next) => {
             description: description
         })
         ***** */
+/*
+//  Working with MongoDB :>
     const product = new Product(
         title,
         price,
@@ -56,12 +58,21 @@ exports.postAddProduct = (req, res, next) => {
         null,
         req.user._id
     );
+*/
+    const product = new Product ({
+        title: title,
+        price: price,
+        description: description,
+        imageUrl: imageUrl,
+        userId: req.user    // mongoose will take the ._id only, out of req.user ...
+    })
+
     product
         .save()
     /* -*-*-*-*-*-*-*-* £££££££££ */
         .then(result => {
             // console.log('result is: ',result);   (eliminating tons of rows  :)
-            console.log('Product Created Successfully ' , result);
+            console.log('Product Created and Saved Successfully ' , result);
             res.redirect('/admin/products');        // once/after the new product is saved, the system redirects to Admin Product html (/admin/products.ejs)
         })
         .catch(err => {
@@ -70,7 +81,7 @@ exports.postAddProduct = (req, res, next) => {
 };
 
 // ****  Using SQL - Sequelize  ****  now updating it for mongoDb  ****
-exports.getEditProduct = (req, res, next) => {       // getEditProduct => action name - That's NOT Correct !!!!!! Action name is the rout (path).
+exports.getEditProduct = (req, res, next) => {      // This should load a product.  getEditProduct => action name - That's NOT Correct !!!!!! Action name is the rout (path).
     const editMode = req.query.edit;       // This rout-function responsible for fetching the product that's going to be edited and rendering it.
     if (!editMode) {
         return res.redirect('/');
@@ -89,7 +100,7 @@ exports.getEditProduct = (req, res, next) => {       // getEditProduct => action
                 pageTitle: 'Edit Product',
                 path: '/admin/edit-product',     // can stay as is, needed only for highlighting certain items in navigation bar
                 editing: editMode,
-                product: product
+                product: product,
                 /*        formsCSS: true,     // can be omitted
                         activeAddProduct: true,    // can be omitted
                         productCSS: true      // can be omitted     */
@@ -129,7 +140,7 @@ exports.postEditProduct = (req, res, next) => {     // responsible for saving th
             // product.imageUrl = updatedImageUrl;
             // product.price = updatedPrice;
             // product.description = updatedDesc;
-        const product = new Product(
+    /*    const product = new Product(    // used before mongoose...
             updatedTitle,
             updatedPrice,
             updatedDesc,
@@ -137,21 +148,28 @@ exports.postEditProduct = (req, res, next) => {     // responsible for saving th
             // new ObjectId(prodId)      we don't need to create the ObjectId in this file, creating it in the product constructor (model) instead..
             prodId                   //   passing prodId string; Looks like this should and is, the original prodId of edited product
         );
+    */
+    // --- instead of creating a new Product ww will call the (original) product from the db, update it and save it. ---
             // return product.save();     // --- second promise ---. Method provided by Sequelize. Only this causes the updated record to be saved in the DB.
                 // return the promise which is return by the save function.
         // })
-        product
-            .save()
-            .then(result => {       // --- second promise. Handling any success responses from the save promise.
-                console.log('PRODUCT UPDATED >>> ', result);
-                res.redirect('/admin/products');  // In case the product looks to not being updated on the html screen (page),
-                // we may need to move the 'redirect' instruction up, putting it inside the second '.then (result)' block, immediately following the: 'console.log('PRODUCT UPDATED!')'.
-                // This is because the redirect takes place before the first promise (of saving the changes) is done.
-                // This also means in case of an error, we never load a new page. Not the best user experience.
-            })
-            .catch(err => console.log(err));    // will catch any errors for both promises
+    Product.findById(prodId).then(product => {
+        product.title = updatedTitle;
+        product.price = updatedPrice;
+        product.description = updatedDesc;
+        product.imageUrl = updatedImageUrl;
+        return product.save();
+    })
+        .then(result => {       // --- second promise. Handling any success responses from the save promise.
+            console.log('PRODUCT UPDATED >>> ', result);
+            res.redirect('/admin/products');  // In case the product looks to not being updated on the html screen (page),
+            // we may need to move the 'redirect' instruction up, putting it inside the second '.then (result)' block, immediately following the: 'console.log('PRODUCT UPDATED!')'.
+            // This is because the redirect takes place before the first promise (of saving the changes) is done.
+            // This also means in case of an error, we never load a new page. Not the best user experience.
+        })
+        .catch(err => console.log('Error saving updated product >: ',err));    // will catch any errors for both promises
 
-    /*const updatedProduct = new Product(
+    /*const updatedProduct = new Product(       // worked with mongoDB but not used with mongoose...
         prodId,
         updatedTitle,
         updatedImageUrl,
@@ -167,7 +185,8 @@ exports.postDeleteProduct = (req, res, next) => {
     console.log('product id to be deleted is: ', prodId);
     // Product.destroy({where: Id = prodId});    -> part of Sequelize... this is one option. the other one is:
     // Product.findByPk(prodId)
-    Product.deleteById(prodId)
+    // Product.deleteById(prodId)
+    Product.findByIdAndDelete(prodId)       // this is the correct function for product deletion.
         /*.then( () => {     // then( product => {
             return product.destroy();      // likely, belongs to Sequelize...
         })  */
@@ -183,14 +202,21 @@ exports.postDeleteProduct = (req, res, next) => {
 
 exports.getProducts = (req, res, next) => {
     //Product.findAll()
-    Product.fetchAll()
+    // Product.fetchAll()    // used before mongoose..
+    Product.find()       //  used with mongoose - fetching all products with 'find' .
     // req.user
     //    .getProducts()
+    //    .select('title price -_id')  ***   // explicitly specifying the data-details you want to get retrieved. The '-' specifies what to exclude.
+    //    .populate('userId', 'name')  ***    // userId is the path we want to populate. pretty much same as select.  [populate related fields and fetch related data]. controlling which fields are return
+                                        // for the main document and also for populated documents.
         .then(products => {
+            console.log(products);  // this way we will be getting this productId only.
             res.render('admin/products.ejs', {  // path to the file that contains the ejs content    // likely not necessary to include the file name extension.
                 prods: products,
                 pageTitle: 'Admin Products',     // instead of docTitle..
                 path: '/admin/products',        //  url address
+
+                user_name: req.user.name
             });
         })
         .catch(err => console.log('Error retrieving all products in controllers/admin file: ' , err));

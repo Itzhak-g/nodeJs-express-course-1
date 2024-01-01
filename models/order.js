@@ -1,12 +1,26 @@
-const Sequelize = require('sequelize');
-const sequelize = require('../util/database');
-const Order = sequelize.define('order', {
-    id: {
-        type: Sequelize.INTEGER,
-        autoIncrement: true,
-        allowNull: false,
-        primaryKey: true
-    },
-});         // no need to declare a product id (item..) or cart id. These are added by the association.
+const mongoose = require('mongoose');
 
-module.exports = Order;
+const Schema = mongoose.Schema;
+
+const orderSchema = new Schema({      // *** order schema *** //
+    products: [
+        {
+            product: {type: Object, required: true},   //
+            quantity: {type: Number, required: true}
+        }
+    ],
+    user: {
+        name: {
+            type: String,
+            required: true
+        },
+        userId: {
+            type: Schema.Types.ObjectId,
+            required: true,
+            ref: 'User'
+        }
+    }
+});
+
+// exporting a module based on 'order schema' model:
+module.exports = mongoose.model('Order', orderSchema);

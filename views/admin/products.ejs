@@ -29,11 +29,12 @@
                                 <p>(views/admin/products.ejs)</p>
                                 <p>(controllers/admin.js/exports.getProducts)</p>
                                 <%= product._id %>
-                                <!-- p><%= product.id %></p -->
+                                <!-- p><%#= product.id %></p -->
+                                <p><%= product.userId %></p>
                                 <div class="card__actions">
                                     <a href="/admin/edit-product/<%= product._id %>?edit=true" class="btn">Edit</a>       <!-- admin route -->
                                     <form action="/admin/delete-product" method="POST">
-                                        <input type="hidden" value="<%= product._id %>" name="productId">
+                                        <input type="hidden" value="product._id <%= product._id %>" name="productId">
                                         <button class="btn" type="submit">Delete</button>
 
                                     </form>

@@ -1,13 +1,18 @@
 // Need to delete this line - - ->  const adminData = require("../routes/admin");
 // const products = [];  - - -  no need this, as we introduced the same variable name in product.js model file..
 const Product = require('../models/product');
+const Order = require('../models/order');
+// ??? const User = require('../models/user');
 // const Cart = require('../models/cart');     -> we never used it; no need for it.
 // const {getProducts} = require("./admin");   not clear why is this showing up here...
 // const Order = require('../models/order');   -> we won't be needing this either..
 
 exports.getProducts = (req, res, next) => {     // getProducts, meaning all products.
-    Product.fetchAll()                // .findAll()  <<< used while using Sequelize...
+ //   Product.fetchAll()                // .findAll()  <<< used while using Sequelize...
+      Product.find()                // the same, used 4 mongoose..
         .then(products => {
+            console.log('getProducts -> logging all products ---');
+            console.log(products);
             res.render('shop/product-list.ejs', {
                 prods: products,
                 pageTitle: 'All Products',     // instead of docTitle..
@@ -74,8 +79,11 @@ exports.getIndex = (req, res, next) => {
         })
         .catch(err => console.log(err));  */
 
-    Product.fetchAll()          //  +++ >>>  .findAll()  <<< used when using Sequelize...
+    // Product.fetchAll()          //  +++ >>>  .findAll()  <<< used when using Sequelize...
+    Product.find()             // used 4 mongoose..
         .then(products => {
+            console.log('getIndex -> logging all products ---');
+            console.log(products);
             res.render('shop/index.ejs', {
                 prods: products,
                 pageTitle: 'Shop-Index',
@@ -87,15 +95,23 @@ exports.getIndex = (req, res, next) => {
         });
 };
 
-// >-#>-#>-#>-#>-#>-#>-# >-# >-# >-# >-# >-# >-# >-# >-# >-# - - - loading the Cart products data onto the cart.html (ejs) form (html page). pretty simple..
+// >-#>-#>-#>-#>-#>-#>-# >* * * **** * * *>-# >-# >-# >-# >-# >-# - - - loading the Cart products data onto the cart.html (ejs) form (html page). pretty simple..
 exports.getCart = (req, res, next) => {
     console.log('req.user: ', req.user);     // just for understanding...
+    console.log('req.user.name: ', req.user.name);
     console.log('req.user.cart :>> ', req.user.cart);   // ?? still gives us undefined.
     req.user
-        .getCart()    // Cart, hence 'getCart', are associated to user. Cart belongs to A User !
+      //  .getCart()    // Cart, hence 'getCart', are associated to user. Cart belongs to A User !  !!this is not used with mongoose!!
         // .then(cart => {
-        .then(products => {
-            console.log('cart [after running req.user.getCart()] :>> ', products);   // It gives 'null' after trying to retrieve cart from 'req.user.cart'.
+        .populate('cart.items.productId')
+        // .execPopulate()     ==> gives an error message..
+        //.then(products => {
+            //console.log('cart [after running req.user.getCart()] :>> ', products);   // It gives 'null' after trying to retrieve cart from 'req.user.cart'.
+        .then(user => {
+            console.log('user.cart.items:: ',user.cart.items);
+            // console.log('req.user 2nd: ', req.user);   // ### just a test to see any potential impacts of populate() on req.user content ###
+            // console.log('req.user.cart 2nd :>> ', req.user.cart);   // ### just a test to see any potential impacts of populate() on req.user content ###
+            const products = user.cart.items;
             /*return cart                                                 // But after running req.use.getCart we get a valid cart.
                 .getProducts()   // Since cart is associated to products. Can be multiple products.
                 .then(products => {*/
@@ -132,7 +148,7 @@ exports.getCart = (req, res, next) => {
 
     });
 } */
-// *-*-*-*-*-*--*-*-*-*-*-*-*-   *-*-*-*-*-*-*-*-*-*-*-*-*-    *-*-*-*-*-*-*-*-*-
+// *-*-*-*-*-*--*-*-*-*-*-*-*- Post Cart  *-*-*-*-*-*-*-*-*-*-*-*-*-    *-*-*-*-*-*-*-*-*-
 // PostCart deals when user adds a new product to a cart. This may happen in one of two cases:
 //   1) when no product exists in the cart so this is the first product to be added to the cart,
 //   2) there are some products already existing in the cart, prior the new product is going to be added.
@@ -141,7 +157,7 @@ exports.getCart = (req, res, next) => {
 exports.postCart = (req, res, next) => {   // product-id is included in the post message parameters sent from the html form.
     const prodId = req.body.productId;     // we want to add a product to a cart.  <input type="hidden" name="productId"
                                                     // value="<%= product._id%>">  <!-- 'name' is the  -->
-    Product.findById(prodId)
+    Product.findById(prodId)        // is this - findById(...) a mongoose function ?
         .then(product => {
             return req.user.addToCart(product);
         })
@@ -195,13 +211,14 @@ exports.postCart = (req, res, next) => {   // product-id is included in the post
 exports.postCartDeleteProduct = (req, res, next) => {       /// Deleting a product from the cart.
     const prodId = req.body.productId;
     req.user
-        .deleteItemFromCart(prodId)
+        // .deleteItemFromCart(prodId)    // mongoose - changing the function name to 'removeFromCart' .
+        .removeFromCart(prodId)
         .then(result => {
             res.redirect('/cart');
         })
         .catch(err => console.log('error deleting cart.item :> ', err));
 
-// =================== Sequelize (most likely) =====================
+// =============== Sequelize (most likely) ================= exports.postCartDeleteProduct ============
     /* const prodId = req.body.productId;
     req.user
         .getCart()
@@ -226,9 +243,36 @@ exports.postCartDeleteProduct = (req, res, next) => {       /// Deleting a produ
 }
 
 exports.postOrder = (req, res, next) => {
-    let fetchedCart;
+ //   let fetchedCart;    not needed in mongoose
+    console.log('===3========99===== just entered postOrder =====99==========3===');
     req.user
-        .getCart()
+        .populate('cart.items.productId')    // in product-id field; array of products data in product-id field..
+        .then(user => {
+            console.log('user.cart.items::>> ',user.cart.items);   // lesson 225, 0:12 minute
+            const products = user.cart.items.map(i => {
+                return { quantity: i.quantity, product: { ...i.productId._doc } };
+            });
+            const order = new Order({
+                user: {
+                    name: req.user.name,
+                    userId: req.user
+                },
+                products: products
+            });
+            return order.save();   // saving the order to the DB.
+        })
+        .then(result => {
+            console.log('postOrder result :++> ', result );
+            return req.user.clearCart();
+
+        })
+        .then( () => {
+            res.redirect('/orders');
+        })
+
+    // req.user
+    //     .addOrder()     // we know the user through req.user
+/*****        .getCart()    // // *** not needed when working with Mongo DB
         .then(cart => {
             fetchedCart = cart;
             return cart.getProducts();
@@ -248,18 +292,21 @@ exports.postOrder = (req, res, next) => {
         })
         .then(result => {
             return fetchedCart.setProducts(null);
-        })
-        .then(result => {
-            res.redirect('/orders');
-        })
+        })  *****/
+        // .then(result => {
+        //     console.log('postOrder result :++> ', result );
+        //     res.redirect('/orders');
+        // })
         .catch(err => console.log('error posting new order: ', err));
 };
 
 exports.getOrders = (req, res, next) => {
-    req.user
-      .getOrders({ include: ['products'] })
+    Order.find( { 'user.userId': req.user._id } )    // 'user.userId' is a key name in Order schema. Its value has to equal to the logged in userId...
+    //req.user
+   // .getOrders({ include: ['products'] })  // used for sequelize
+   // .getOrders()
       .then( orders => {
-        console.log('testing orders:: ', orders);
+        console.log('testing orders:*: ', orders);
         res.render('shop/orders.ejs', {
             path: '/orders',
             pageTitle: 'Your Orders',
